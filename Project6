@@ -1,0 +1,129 @@
+symbolTable = {
+               "R0":0,
+               "R1":1,
+               "R2":2,
+               "R3":3,
+               "R4":4,
+               "SCREEN":16384,
+               "KBD":24576
+
+              }
+
+
+
+def main():
+    
+   #FileName: "iterate,asm"
+    #Opening the file and reading it simultaneously line by line
+    
+    code = [] # create an empty list which will contain pure code.
+    
+    fileName = "C:\\Users\\nivedita\\Desktop\\iterate.asm"
+    outFileName = fileName + ".hack"
+    
+    try:
+        inFile = open(fileName, "r")#inFile has the object of while and we are opening the file with permissions of read only
+        print("File opened.")
+        
+    except:
+        print("Error opening the file: " + fileName)
+        return
+    
+# Open the output file in write mode.
+    try:
+        outFile = open(outFileName, "w") # outFile has the object of file
+        print("File opened.")
+            
+    except:
+        print("Error openeing the file: " + outFileName)
+        return
+        
+    line = inFile.readline() # reading the file line by line
+    
+    while line != "":
+        line = getPureCode(line)
+        if line !="":
+            code.append(line)
+            
+        line = inFile.readline() # Keep printing and raeding the next line until line is equal to null
+        
+    inFile.close()
+   # print(code)
+    firstPass(code)
+    printSymbolTable(symbolTable)
+    #print(code)
+    secondPass(code, outFile)
+    outFile.close()
+
+
+def printSymbolTable(symbolTable):
+    for x,y in symbolTable.items():
+        print(x, ":", y)
+
+    
+def getPureCode(line):
+    # find and remove comments and spaces. 
+    try : 
+        pos= line.index("//") #Getting rid of the comments 
+        line = line[0:pos] #Extracting the line of code from 0 till position (pos)
+    except:
+        pass
+    line = line.strip() #Removes leading and trailing spaces within the instruction.
+    
+    line = line.replace(" ", "")# Getting rid of spaces in between pure code
+    line = line.replace("\t", "")# Getting rid of tabs
+    return line
+
+def firstPass(code):
+    global symbolTable
+    i = 0
+    while i < len(code):
+        # Lets check if this list item is a lable symbol.
+        if (code[i][0] == "("):  # code[0][0] = @  and code[0][1] = i
+            label = parseLabel(code[i]) #(LOOP) ---> LOOP
+            if label != "":
+                symbolTable[label] = i
+            code.pop(i)
+            continue   # ignore incrementing i since we have deleted current insturction from the list, i is now pointing to next instruction.
+        
+        i = i+1
+                   
+def parseLabel(lblstatement):
+    if (lblstatement[-1] ==")"):
+        return (lblstatement[1:len(lblstatement)-1])
+    return ""
+
+
+def secondPass(code, outFile):
+    n = 16
+    i = 0
+    global symbolTable
+    while i < len(code):
+        #Lets check if this the ith element from the list "code" is a variable symbol. Add it in the symbol table.
+  
+    # check if this is an A instruction
+       
+        if (code[i][0] == "@"):
+            # check if the symbol is already present in symbol table, tranlsate the instruction, otherwise add the symbol in the table and translate the instruction.
+            # complete this to add symbol in symbolTable
+            bcode = translateA(code[i])
+        else:
+            bcode = translateC(code[i])
+        
+        i = i+1
+        outFile.write(bcode+"\n")
+        
+    
+ 
+def translateA(inst):
+    #@16 ---->  00000000000010000 
+    # convert the value after @ to bianry, make it 16 bits long and return
+    return "0000000000000000"
+    
+
+def translateC(inst):
+   
+    # do the translation of C as per the specification of HACK langauge.
+    return "1000000000000011"
+
+main()
